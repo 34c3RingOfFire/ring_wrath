@@ -39,6 +39,19 @@ class Multicaster:
    def update_ip_list(self, newlist):
        self.ip_list = newlist
 
+   def my_peer(self):
+       try:
+          pos = 1+self.ip_list.index(self.my_ip)
+       except:
+          print("ERROR: could not find myself in ip list")
+          sys.exit(1)
+       if pos >= len(self.ip_list):
+           return self.ip_list[0]
+       else:
+           return self.ip_list[pos]
+	       
+
+
    def send_out_msg(self, msg):
        out_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
        out_sock.settimeout(0.2)
