@@ -41,6 +41,7 @@ class Multicaster:
        self.me_list = external_ip_list()
        self.my_ip = choose_external_ip()
        self.ip_list = [ self.my_ip ]
+       print('Multicaster initialised')
 
    def update_ip_list(self, newlist):
        self.ip_list = newlist
@@ -71,10 +72,14 @@ class Multicaster:
        
 
    def emit_my_ip_list(self):
-        return self.send_out_msg(Multicaster.marshall(self.ip_list))
+        result = self.send_out_msg(Multicaster.marshall(self.ip_list))
+        print('emitted ip list: ' + str(result))
+        return result
 
    def announce_yourself(self):
-        return self.send_out_msg("ANNOUNCE\n" + self.my_ip)
+        result = self.send_out_msg("ANNOUNCE\n" + self.my_ip)
+        print('announced myself: ' + str(result))
+        return result
 
    def marshall(ip_list):
         str = ""
@@ -86,15 +91,18 @@ class Multicaster:
         return data.decode().splitlines() 
 
    def run(self):
+      print('Multicaster run!')
       self.run = True
       self.announce_yourself()
       try: 
          while self.run:
             data, address = self.sock.recvfrom(1024)
+            print('Multicaster received multicast from ' + str(address))
             if address in self.me_list: 
                    continue
             incoming_ip_list = Multicaster.parse_ip_list(data)
             if not self.my_ip in incoming_ip_list: 
+                    print('Multicaster: "They do not know me! Append me!"')
                     incoming_ip_list.append(self.my_ip)
                     self.update_ip_list(incoming_ip_list)
                     emit_my_ip_list();
