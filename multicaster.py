@@ -1,6 +1,8 @@
+from sys import platform
 import socket
 import struct
-from netifaces import interfaces, ifaddresses, AF_INET
+if (platform.startswith("freebsd")!= True):
+    from netifaces import interfaces, ifaddresses, AF_INET
 from random import choice
 
 # derived from https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
@@ -10,10 +12,14 @@ def flatten(l):
    return [ i for sublist in l for i in sublist ]
 
 def external_ip_list():
+    if (platform.startswith("freebsd") != True):
          addresses = [i['addr'] for ifaceName in interfaces() 
 	                 for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr':'No IP addr'}] )]
          return list(filter( lambda ip:  not ip.startswith('127.'), addresses) )
-   
+    else:
+        ip = subprocess.call(['./getip.sh'])
+        print(ip)
+        return ip
       # print '%s: %s' % (ifaceName, ', '.join(addresses))
 
 
