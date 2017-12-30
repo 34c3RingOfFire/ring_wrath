@@ -3,6 +3,8 @@ import socket
 import struct
 if (platform.startswith("freebsd")!= True):
     from netifaces import interfaces, ifaddresses, AF_INET
+else:
+    import os
 from random import choice
 
 # derived from https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
@@ -17,9 +19,9 @@ def external_ip_list():
 	                 for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr':'No IP addr'}] )]
          return list(filter( lambda ip:  not ip.startswith('127.'), addresses) )
     else:
-        ip = subprocess.call(['./getip.sh'])
+        ip = os.system('sh ./getip.sh')
         print(ip)
-        return ip
+        return list([str(ip)])
       # print '%s: %s' % (ifaceName, ', '.join(addresses))
 
 
@@ -37,7 +39,8 @@ class Multicaster:
 
        group = socket.inet_aton(ip)
        mreq =  struct.pack('4sL', group, socket.INADDR_ANY)
-       self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+       if (platform.startswith('freebsd') != True):
+           self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
        self.me_list = external_ip_list()
        self.my_ip = choose_external_ip()
        self.ip_list = [ self.my_ip ]
