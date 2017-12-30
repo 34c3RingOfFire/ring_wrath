@@ -105,7 +105,7 @@ class Multicaster:
                     print('Multicaster: "They do not know me! Append me!"')
                     incoming_ip_list.append(self.my_ip)
                     self.update_ip_list(incoming_ip_list)
-                    emit_my_ip_list();
+                    self.emit_my_ip_list();
       finally:
           self.sock.close()
       
