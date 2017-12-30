@@ -102,6 +102,7 @@ class Multicaster:
             data, address = self.sock.recvfrom(1024)
             print('Multicaster received multicast from ' + str(address))
             if address in self.me_list: 
+                   print('Multicaster has been talking to himself.')
                    continue
             incoming_ip_list = Multicaster.parse_ip_list(data)
             if not self.my_ip in incoming_ip_list: 
