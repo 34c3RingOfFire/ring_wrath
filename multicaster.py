@@ -1,3 +1,5 @@
+import socket
+import struct
 from netifaces import interfaces, ifaddresses, AF_INET
 from random import choice
 
@@ -17,3 +19,69 @@ def external_ip_list():
 
 def choose_external_ip():
 	return choice(external_ip_list())
+
+
+
+class Multicaster:
+   def __init__(self, ip, port):
+       addr = ('', port)
+       self.mc_group = (ip, port)
+       self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+       self.sock.bind(addr)
+
+       group = socket.inet_aton(ip)
+       mreq =  struct.pack('4sL', group, socket.INADDR_ANY)
+       self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+       self.me_list = external_ip_list()
+       self.my_ip = choose_external_ip()
+       self.ip_list = [ self.my_ip ]
+
+   def update_ip_list(self, newlist):
+       self.ip_list = newlist
+
+   def send_out_msg(self, msg):
+       out_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+       out_sock.settimeout(0.2)
+       ttl = struct.pack('b', 2)
+       out_sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
+       try:
+           sent = out_sock.sendto(msg.encode(), self.mc_group)
+       finally:
+           out_sock.close()
+       return sent
+       
+
+   def emit_my_ip_list(self):
+        return self.send_out_msg(Multicaster.marshall(self.ip_list))
+
+   def announce_yourself(self):
+        return self.send_out_msg("ANNOUNCE\n" + self.my_ip)
+
+   def marshall(ip_list):
+        str = ""
+        for ip in ip_list:
+            str += ip + "\n"
+        return str
+
+   def parse_ip_list(data):
+        return data.decode().splitlines() 
+
+   def run(self):
+      self.run = True
+      self.announce_yourself()
+      try: 
+         while self.run:
+            data, address = self.sock.recvfrom(1024)
+            if address in self.me_list: 
+                   continue
+            incoming_ip_list = Multicaster.parse_ip_list(data)
+            if not self.my_ip in incoming_ip_list: 
+                    incoming_ip_list.append(self.my_ip)
+                    self.update_ip_list(incoming_ip_list)
+                    emit_my_ip_list();
+      finally:
+          self.sock.close()
+      
+
+   def stop(self):
+       self.run = False
