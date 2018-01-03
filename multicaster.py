@@ -116,3 +116,5 @@ class Multicaster:
 
    def stop(self):
        self.run = False
+mc = Multicaster('224.1.1.1', 7073)
+mc.run()
