@@ -6,4 +6,4 @@ start to loop the loop. every time the fire hits a node of the ring, the screen 
 With the *socat ring of fire* you are able to not just listen to but also create the ring of fire johnny cash 
 keeps singing about.
 
-The idea was part of an assembly of the [CCC-HB](https://ccc-hb.de/ "Chaos Computer Club Bremen") for the 34C3 
+The idea was part of an assembly of the [CCC-HB](https://ccchb.de/ "Chaos Computer Club Bremen") for the 34C3 
